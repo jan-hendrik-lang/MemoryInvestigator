@@ -8,7 +8,7 @@ setup(
     description="A Streamlit-based application for automated memory forensic analysis using Volatility3 and LLMs.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/your-repo/memory-investigator",
+    url="https://github.com/jan-hendrik-lang/MemoryInvestigator",
     packages=find_packages(),
     install_requires=[
         "streamlit",
