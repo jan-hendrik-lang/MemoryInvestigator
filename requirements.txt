@@ -1,0 +1,15 @@
+streamlit~=1.41.0
+protobuf~=5.29.1
+pandas~=2.2.3
+openai~=1.59.3
+langchain-google-genai~=2.0.7
+langchain~=0.3.14
+langchain-core~=0.3.31
+langchain-community~=0.3.14
+langchain-openai~=0.2.14
+requests~=2.32.3
+keyboard~=0.13.5
+psutil~=6.1.1
+setuptools~=70.0.0
+streamlit_agraph~=0.0.45
+langchain_chroma~=0.2.0
