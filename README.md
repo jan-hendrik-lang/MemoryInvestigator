@@ -31,7 +31,7 @@ Memory Investigator was developed as part of a master's thesis at the Munich Uni
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/MemoryInvestigator.git
+   git clone https://github.com/jan-hendrik-lang/MemoryInvestigator.git
    cd MemoryInvestigator
    ```
 2. Install required dependencies:
@@ -94,14 +94,14 @@ Upload memory dump files (`.raw`, `.vmem`, `.vmsn`) and provide project details.
 
 ### 2. Button: Analyze Data and Build a Basic Tree
 
-After a valid memory dump was uploaded to `O:\01_memory` the button `Analyze Data and Build a Basic Tree` will be available. By pressing this Button the script `.\utils\volatility_analysis.py` starts. Now Volatility3 starts for the deep memory analysis by executing multiple forensic plugins and outputting `.json` files:
+After a valid memory dump was uploaded to `O:\01_memory` the button `Analyze Data and Build a Basic Tree` will be available. By pressing this Button the script `\utils\volatility_analysis.py` starts. Now Volatility3 starts for the deep memory analysis by executing multiple forensic plugins and outputting `.json` files:
 - **Process Analysis:** `windows.pslist`, `windows.svcscan`, `windows.cmdline`, `windows.dlllist`, `windows.getsids`
 - **Network Investigation:** `windows.netstat`, `windows.netscan`
 - **Malware Detection:** `windows.malfind`, `windows.suspicious_threads`, `windows.ldrmodules`, `windows.processghosting`, `windows.hollowprocesses`
 - **Service Investigation:** `windows.svcscan`, `windows.svcdiff`
 - **File Analysis:** `windows.filescan` 
 
-After the Volatility3 analysis is finished, the script `.\utils\tree_builder.py` starts. It builds a basic tree out of the `PID`, `PPID`, `ImageFileName`, `CreateTime`, `ExitTime`. Further described below in the Section Tree-of-Table Algorithm.
+After the Volatility3 analysis is finished, the script `\utils\tree_builder.py` starts. It builds a basic tree out of the `PID`, `PPID`, `ImageFileName`, `CreateTime`, `ExitTime`. Further described below in the Section Tree-of-Table Algorithm.
 
 ### 2. Display Data as a Table
 
@@ -122,6 +122,7 @@ Also search the graph and zoom in or out.
 ### 4. Extract Data
 
 Extract specific files from the memory dump to analyze these files deeper e.g. with file hashing, static or dynamic malware analysis. Files are extracted with the `windows.dumpfiles` Volatility3 module, specifying the virtual address.
+
 ![Extract Data](screenshots/extract_data.jpg)
 
 ### 5. Tree-of-Table Analysis
@@ -131,17 +132,16 @@ Interact with the selected LLM and an already created basic Tree-of-Table (`O:\0
 ![Tree-of-Table Analysis](screenshots/tree-of-table.jpg)
 
 ### 6. Standard RAG
-Retrieval Augmented Generation (RAG) is a powerful approach that enhances language models through the cooporation of external knowledge sources. RAG addresses a major limitation of models: they rely on static training datasets, potentially leading to outdated or inadequate information. When a query is received, RAG systems first search a knowledge base for relevant information. The system then coorporates this collected data into the model's prompt. The model uses the provided context to generate a response to the question. RAG is a powerful approach for developing more skilled and reliable AI systems by linking extensive language models with targeted information.<sup>[1]</sup> To build the RAG itself and the retrieval chat chain (`/utils/chat_handler.py`) the langchain framework is used.\
-The script `/utils/build_rag_from_books.py` builds a RAG out of provided `.pdf` files (e.g. _The Art of Memory Forensics_ or _threat intelligence reports_) and a given reference name from Malpedia (e.g. `win.emotet`) combined with the script `/utils/get_malpedia_references.py`. Malpedia from the Fraunhofer FKIE is a collaborative malware knowledge base providing structured information about malware.<sup>[2]</sup>\
+Retrieval Augmented Generation (RAG) is a powerful approach that enhances language models through the cooporation of external knowledge sources. RAG addresses a major limitation of models: they rely on static training datasets, potentially leading to outdated or inadequate information. When a query is received, RAG systems first search a knowledge base for relevant information. The system then coorporates this collected data into the model's prompt. The model uses the provided context to generate a response to the question. RAG is a powerful approach for developing more skilled and reliable AI systems by linking extensive language models with targeted information.<sup>[1]</sup> To build the RAG itself and the retrieval chat chain (`\utils\chat_handler.py`) the langchain framework is used.\
+The script `\utils\build_rag_from_books.py` builds a RAG out of provided `.pdf` files (e.g. _The Art of Memory Forensics_ or _threat intelligence reports_) and a given reference name from Malpedia (e.g. `win.emotet`) combined with the script `\utils\get_malpedia_references.py`. Malpedia from the Fraunhofer FKIE is a collaborative malware knowledge base providing structured information about malware.<sup>[2]</sup>\
 After building the RAG it uses the Tree-of-Table Algorithm to interact with the selected LLM. Even this approach supports the idea above, to provide the LLM with more and more detailed information to gather deeper insights to the memory dump. In this case with a user selection of e.g. the latest threat intelligence reports or threat intelligence reports that could fit to the attack vector of the memory dumps previous analysis.
 Under the specification of a LLM and a associated Embedding the Chroma Vector Database will be permanently created in `O:\05_standard_rag\chroma_store`. Chroma is an open-source database for AI applications to create LLM applications by allowing specific data to be easily integrated into LLMs.<sup>[3]</sup>
-
 
 ![Standard RAG](screenshots/standard_rag.jpg)
 
 ### 7. Experimental Forensic RAG
 
-This RAG does not only include prosa text like mentioned before, it also includes the Volatility3 files from `O:\02_volatility_output`. Here as well, after the specification of a LLM and an associated Embedding the Chroma Vector Database will be created. After the embedding of the `.pdf` files, the script `/utils/build_rag_from_books_and_volatility3_data.py` extends the mechanism from Section 6 with copying the Volatility3 Output to `O:\06_experimental_rag` and embedding it to the Choma Vector Store. The idea behind this method is to provide the user with an alternative model to provide the Volatility3 Output to the LLM.
+This RAG does not only include prosa text like mentioned before, it also includes the Volatility3 files from `O:\02_volatility_output`. Here as well, after the specification of a LLM and an associated Embedding the Chroma Vector Database will be created. After the embedding of the `.pdf` files, the script `\utils\build_rag_from_books_and_volatility3_data.py` extends the mechanism from Section 6 with copying the Volatility3 Output to `O:\06_experimental_rag` and embedding it to the Choma Vector Store. The idea behind this method is to provide the user with an alternative model to provide the Volatility3 Output to the LLM.
 
 ![Experimental Forensic RAG](screenshots/experimental_rag.jpg)
 
@@ -157,7 +157,7 @@ This could be implemented in a specific button as well, but a prerequisite is to
 ## Tree-of-Table Algorithm
 Providing large-scale tabular data, to LLMs is a challenge. LLMs were mainly designed for prose files, which is why even providing the `windows.pslist` causes too high tokens in the context window.
 For that Ji et al. introduced Tree-of-Table, which employs a hierarchical tree structure <sup>[4]</sup> The Algorithm follows multiple steps and is implemented in this manner:
-1. **Table Condensation and Decomposition:** Firstly, the large table must be divided into task relevant parts to focus on pertinent information. For that, in `utils/tree_builder.py` the `field_mapping` describes relevant fields in the produced output from Volatility3. For an initial overview of the memory dump, a basic tree is built. After that, the user can specify relevant Volatility3 modules with predefined fields and, if necessary a PID, to build a custom tree and thus to provide the LLM with more and more detailed information in a continuous process.
+1. **Table Condensation and Decomposition:** Firstly, the large table must be divided into task relevant parts to focus on pertinent information. For that, in `\utils\tree_builder.py` the `field_mapping` describes relevant fields in the produced output from Volatility3. For an initial overview of the memory dump, a basic tree is built. After that, the user can specify relevant Volatility3 modules with predefined fields and, if necessary a PID, to build a custom tree and thus to provide the LLM with more and more detailed information in a continuous process.
 2. **Table-Tree Construction:** Ji et al. employed a "breadth-first" approach. They broke down the issue into multiple general, independent yet interconnected subprocesses and subsequently refined each subprocess into more detailed solutions through iteration. In our approach, this step is easier because every Process has his unique ID `(PID)` by default and can be connected via the Parents Process ID `(PPID)`. So even each executed Volatility3 Modul has a containing PID and can therefore be added to this particular process. One possibility remains, a process could be exited but e.g. the network traffic remains without a `PID` in the memory dump. If something like this happens, these artifacts will be added to the end of the tree.
 3. **Table-Tree Execution:** Lastly, Ji et al. utilize the Table-Tree execution as a depth-first search technique to methodically explore and calculate intermediate results within the tree framework, improving reasoning efficiency by handling and retaining subtrees separately. In our approach, this is done manually by the user. As mentioned before, the user is able to build custom trees and therefore provide it with more and more detailed information in a continuous process.
 
@@ -282,7 +282,7 @@ The role of ethics in digital forensics and artificial intelligence is crucial. 
 - **LLM's Hallucination**: Since LLMs rely on probabilistic text generation, they may generate facts, references, or conclusions that appear credible but are ultimately misleading or false. This poses a serious risk in forensic investigations, where accuracy is essential.
 - **LLM's Privacy Risks**: Digital forensics often involves handling sensitive data. The LLM's provider could potentially use this information for model training or even industrial espionage.
 - **LLM's Bias**: Misleading biases can arise due to incorrect prompts, flawed data, or confirmation bias.
-- **EU AI Act**: The EU AI Act (Regulation (EU) 2024/1689) sets guidelines for the development and use of AI within the EU. Research is not affected by the regulation. However, if the software is used in real-world applications, the level of risk depends on the user. If law enforcement is using it, there are no additional strict regulations. If a company, such as one securing a data center, deploys the software, the risk is limited and subject to fewer regulations.
+- **EU AI Act**: The EU AI Act _(Regulation (EU) 2024/1689)_ sets guidelines for the development and use of AI within the EU. Research is not affected by the regulation. However, if the software is used in real-world applications, the level of risk depends on the user. If law enforcement is using it, there are additional strict regulations. If a company, such as a data center, deploys the software, the risk is limited and subject to fewer regulations.
 - **Forensic Software in Court**: Due to reliability concerns and the fact that an LLM is a black-box system, it will be difficult - if not impossible - to use its output as evidence in court.
 
 By acknowledging these ethical and technical challenges, users can better manage the risks through the following steps:
@@ -296,8 +296,8 @@ By acknowledging these ethical and technical challenges, users can better manage
 
 ## Further Development
 - **Report-Generator:** Besides this master´s thesis, the report generator is expandable. E.g. bookmark important output for the LLM and combining it later in the report.
-- **Interactive AI:** Actually the Software is a human-in-the-loop (HITL). These systems have limitations not only, but especially due to its reliance on human input (unpredictable, and erroneous). <sup>[7]</sup> In order to solve this problem, an LLM can execute external functions like calculators. This is to solve problems beyond typical LLM capabilities, like in this case calculating. In this particular Software the LLM could use the `/util/tree_builder.py` in cooperation with `/util/volatility_analysis.py` as a tool and generate his own needed data from the memory dump for a deep and a self-driven analysis.
-- **Expand Experimental Forensic RAG with Malpedia:** Caused by the clearness, until now Malpedia with the WebBaseLoader is only implemented in the `Standard RAG`. Using `/util/get_references_from_malpedia.py`, like `/util/build_rag_from_books.py` in `/util/build_rag_from_books_and_volatlity3.py` would expand the Experimental Forensic RAG with Malpedia.
+- **Interactive AI:** Actually the Software is a human-in-the-loop (HITL). These systems have limitations not only, but especially due to its reliance on human input (unpredictable, and erroneous). <sup>[7]</sup> In order to solve this problem, an LLM can execute external functions like calculators. This is to solve problems beyond typical LLM capabilities, like in this case calculating. In this particular Software the LLM could use the `\utils\tree_builder.py` in cooperation with `\utils\volatility_analysis.py` as a tool and generate his own needed data from the memory dump for a deep and a self-driven analysis.
+- **Expand Experimental Forensic RAG with Malpedia:** Caused by the clearness, until now Malpedia with the WebBaseLoader is only implemented in the `Standard RAG`. Using `\utils\get_references_from_malpedia.py`, like `\utils\build_rag_from_books.py` in `\utils\build_rag_from_books_and_volatlity3.py` would expand the Experimental Forensic RAG with Malpedia.
 
 ## References 
 
