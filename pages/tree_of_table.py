@@ -59,6 +59,9 @@ number_of_divided_jsons = right.number_input("Divide json file in multiple files
 prompt = st.chat_input("Ask the LLM about the analysis results or provide parameters:")
 
 if api_llm_key:
-    handle_llm_chat(llm_option, api_llm_key, number_of_divided_jsons, prompt)
+    try:
+        handle_llm_chat(llm_option, api_llm_key, number_of_divided_jsons, prompt)
+    except Exception as e:
+        st.error(f"Error during query processing: {str(e)}")
 else:
     st.error("You must provide API LLM Key to continue working.")
