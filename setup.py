@@ -25,7 +25,9 @@ setup(
         "keyboard",
         "psutil",
         "setuptools",
-        "streamlit_agraph"
+        "streamlit_agraph",
+        "beautifulsoup4",
+        "langid"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
