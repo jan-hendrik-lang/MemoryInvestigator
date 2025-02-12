@@ -13,3 +13,5 @@ psutil~=6.1.1
 setuptools~=70.0.0
 streamlit_agraph~=0.0.45
 langchain_chroma~=0.2.0
+beautifulsoup4~=4.13.3
+langid~=1.1.6
