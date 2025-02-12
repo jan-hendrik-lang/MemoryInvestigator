@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -8,6 +9,30 @@ from langchain_openai import OpenAIEmbeddings
 
 from utils.get_malpedia_references import get_references_from_malpedia
 
+async def load_url_async(url):
+    """
+    Asynchronously loads an HTML document from a given URL.
+
+    :param url: The URL to fetch the HTML content from.
+    :return: A list of parsed HTML documents or an empty list if an error occurs.
+    """
+    try:
+        loader = AsyncHtmlLoader(url)
+        return await loader.aload()
+    except Exception as e:
+        print(f"Error loading {url}: {e}")
+        return []
+
+async def load_all_urls(urls):
+    """
+    Asynchronously loads multiple URLs concurrently.
+
+    :param urls: A list of URLs to fetch HTML content from.
+    :return: A list of parsed HTML documents or an empty list if an error occurs.
+    """
+    tasks = [load_url_async(url) for url in urls]
+    results = await asyncio.gather(*tasks)
+    return [doc for sublist in results for doc in sublist]
 
 def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference_name=None):
     """
@@ -52,12 +77,7 @@ def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference
         # Fetch and load Malpedia references if enabled
         if malpedia_reference_name is not None :
             urls = get_references_from_malpedia(malpedia_reference_name)
-            for url in urls:
-                try:
-                    web_loader = WebBaseLoader(url)
-                    documents.extend(web_loader.load())
-                except Exception as e:
-                    print(f"Error loading Malpedia reference from {url}: {e}")
+            documents.extend(asyncio.run(load_all_urls(urls)))
 
         # Split documents into smaller chunks
         split_docs = text_splitter.split_documents(documents)
