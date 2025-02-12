@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 
 # Import utility functions for file handling, tree selection, experimental RAG building, and querying
@@ -36,7 +38,7 @@ llm_option = left.selectbox(
     index=0
 )
 if llm_option.startswith("gemini"):
-    embedding_options = ["models/embedding-001", "models/embedding-004", "text-embedding-004"]
+    embedding_options = ["models/embedding-001", "models/embedding-004"]
 elif llm_option == "chatgpt-4o-latest" or llm_option == "gpt-3.5-turbo" or llm_option == "o1-preview":
     embedding_options = ["text-embedding-3-large"]
 embedding_option = middle.selectbox(
@@ -44,32 +46,34 @@ embedding_option = middle.selectbox(
     options=embedding_options,
     index=0
 )
-# API key input fields for LLM and LangChain authentication
+# API key input field for LLM
 api_key = right.text_input("API Key Input:", type="password")
 
-# Build RAG if API keys are provided
+vectorstore_dir = "O:\\06_experimental_rag\\chroma_store"
+
+# Build RAG and Chat with LLM, if RAG is available
 if api_key:
-    if st.button("Build RAG", use_container_width= True):
-        with st.spinner("Building RAG..."):
-            build_experimental_forensic_rag(api_key, llm_option, embedding_option)
-            st.success("RAG built!")
+    try:
+        if os.path.exists(vectorstore_dir):
+            tree = choose_basic_or_costume_tree()
+            if tree is not None:
+                with open(tree, 'r', encoding='utf-8') as file:
+                    # Read the entire contents of the file
+                    json_data = file.read()
+                    prompt = st.chat_input("Ask LLM about the analysis results or provide parameters:")
+                    if prompt:
+                        with st.spinner("Fetching response..."):
+                            formatted_prompt = f"{prompt} {json_data}"
+                            answer = answer_query(api_key, llm_option, embedding_option, "experimental", formatted_prompt)
+                        st.write("**Context:**", answer["context"])
+                        st.write("**LLM says:**", answer["answer"])
+        else:
+            if st.button("Build RAG", use_container_width=True):
+                with st.spinner("⏳ Processing... This may take a while. Depending on the complexity, it could take **several hours**. Feel free to grab a coffee ☕ or check back later."):
+                    build_experimental_forensic_rag(api_key, llm_option, embedding_option)
+                    st.success("Experimental RAG successfully built and saved to `O:\\06_experimental_rag\\chroma_store`.")
+                    st.rerun()
+    except Exception as e:
+        st.error(f"Error during query processing: {str(e)}")
 else:
-    st.error("You must provide API LLM Key to continue working.")
-
-# If no RAG available, built RAG and also Chat with the RAG if API keys are available
-if api_key:
-    tree = choose_basic_or_costume_tree()
-    if tree is not None:
-        with open(tree, 'r', encoding='utf-8') as file:
-            # Read the entire contents of the file
-            json_data = file.read()
-            prompt = st.chat_input("Ask LLM about the analysis results or provide parameters:")
-            if prompt:
-                with st.spinner("Fetching response..."):
-                    formatted_prompt = f"{prompt} {json_data}"
-                    answer = answer_query(api_key, llm_option, embedding_option, "experimental", formatted_prompt)
-                st.write("**Context:**", answer["context"])
-                st.write("**LLM says:**", answer["answer"])
-
-    else:
-        st.error("Please build a tree to analyze the memory.")
+    st.error("You must provide API Key to continue working.")
