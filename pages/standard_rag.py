@@ -45,7 +45,7 @@ llm_option = left.selectbox(
     index=0
 )
 if llm_option.startswith("gemini"):
-    embedding_options = ["models/embedding-001", "models/embedding-004", "text-embedding-004"]
+    embedding_options = ["models/embedding-001", "models/embedding-004"]
 elif llm_option == "chatgpt-4o-latest" or llm_option == "gpt-3.5-turbo" or llm_option == "o1-preview":
     embedding_options = ["text-embedding-3-large"]
 embedding_option = middle.selectbox(
@@ -60,37 +60,38 @@ api_key = right.text_input("API Key Input:", type="password")
 directory = r"O:\\05_standard_rag"
 vectorstore_dir = "O:\\05_standard_rag\\chroma_store"
 
-# Build RAG if API keys are provided
+# Build RAG and Chat with LLM, if RAG is available
 if api_key:
-    pdf_files = [f for f in os.listdir(directory) if f.endswith('.pdf')]
-    if pdf_files or malpedia_reference_name:
-        if not os.path.exists(vectorstore_dir):
-            if st.button("Build RAG", use_container_width= True):
-                with st.spinner("Building RAG..."):
-                    if malpedia_reference_name:
-                        build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference_name)
-                    else:
-                        build_standard_rag(api_key, llm_option, embedding_option)
-                    st.success("Standard RAG successfully built and saved to `O:\\05_standard_rag\\chroma_store`.")
-    else:
-        st.error("You must enter a Malpedia Reference or provide .pdf files to the directory.")
+    try:
+        pdf_files = [f for f in os.listdir(directory) if f.endswith('.pdf')]
+        if os.path.exists(vectorstore_dir):
+            tree = choose_basic_or_costume_tree()
+            if tree is not None:
+                with open(tree, 'r', encoding='utf-8') as file:
+                    # Read the entire contents of the file
+                    json_data = file.read()
+                    prompt = st.chat_input("Ask LLM about the analysis results or provide parameters:")
+                    if prompt:
+                        with st.spinner("Fetching response..."):
+                            formatted_prompt = f"{prompt} {json_data}"
+                            answer = answer_query(api_key, llm_option, embedding_option, "standard", formatted_prompt)
+                        st.write("**Context:**", answer["context"])
+                        st.write("**LLM says:**", answer["answer"])
+        else:
+            if pdf_files or malpedia_reference_name:
+                if st.button("Build RAG", use_container_width= True):
+                    with st.spinner("⏳ Processing... This may take a while. Depending on the complexity, it could take **several hours**. Feel free to grab a coffee ☕ or check back later."):
+                        if malpedia_reference_name:
+                            build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference_name)
+                        else:
+                            build_standard_rag(api_key, llm_option, embedding_option)
+                        st.success("Standard RAG successfully built and saved to `O:\\05_standard_rag\\chroma_store`.")
+                        st.rerun()
+            else:
+                st.error("You must enter a Malpedia Reference or provide .pdf files to the directory.")
+
+    except Exception as e:
+        st.error(f"Error during query processing: {str(e)}")
+
 else:
-    st.error("You must provide API LLM Key to continue working.")
-
-# If no RAG available, built RAG and also Chat with the RAG if API keys are available
-if api_key and os.path.exists(vectorstore_dir):
-    tree = choose_basic_or_costume_tree()
-    if tree is not None:
-        with open(tree, 'r', encoding='utf-8') as file:
-            # Read the entire contents of the file
-            json_data = file.read()
-            prompt = st.chat_input("Ask Gemini about the analysis results or provide parameters:")
-            if prompt:
-                with st.spinner("Fetching response..."):
-                    formatted_prompt = f"{prompt} {json_data}"
-                    answer = answer_query(api_key, llm_option, embedding_option, "standard", formatted_prompt)
-                st.write("**Context:**", answer["context"])
-                st.write("**LLM says:**", answer["answer"])
-
-    else:
-        st.error("Please build a tree to analyze the memory.")
+    st.error("You must provide API Key to continue working.")
