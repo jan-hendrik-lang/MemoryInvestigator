@@ -1,38 +1,97 @@
 import os
+import re
 import asyncio
+import langid
+from bs4 import BeautifulSoup
 
-from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
+from langchain_community.document_loaders import PyPDFLoader, AsyncHtmlLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
+from langchain.schema import Document
 
 from utils.get_malpedia_references import get_references_from_malpedia
 
+
 async def load_url_async(url):
     """
-    Asynchronously loads an HTML document from a given URL.
+    Asynchronously loads an HTML document from a given URL, cleans it, removes irrelevant content,
+    extracts metadata, and filters out non-English/German content.
 
-    :param url: The URL to fetch the HTML content from.
-    :return: A list of parsed HTML documents or an empty list if an error occurs.
+    :param url: The URL to load.
+    :return: The loaded HTML document.
     """
     try:
         loader = AsyncHtmlLoader(url)
-        return await loader.aload()
+        docs = await loader.aload()
+        cleaned_docs = []
+
+        for doc in docs:
+            soup = BeautifulSoup(doc.page_content, "html.parser")
+
+            # Remove unwanted HTML elements
+            for tag in soup(["script", "style", "nav", "footer", "aside", "iframe", "noscript"]):
+                tag.extract()
+
+            # Remove common banners (GDPR, cookies, disclaimers)
+            for banner in soup.find_all(text=re.compile(r"cookie|gdpr|privacy|terms|consent", re.IGNORECASE)):
+                banner.extract()
+
+            # Extract metadata
+            title = soup.title.string if soup.title else ""
+            if not title:
+                h1 = soup.find("h1")
+                title = h1.get_text(strip=True) if h1 else "Untitled"
+
+            author_tag = soup.find("meta", attrs={"name": "author"}) or \
+                         soup.find("meta", attrs={"property": "article:author"})
+            author = author_tag["content"].strip() if author_tag and "content" in author_tag.attrs else "Unknown"
+
+            date_tag = soup.find("meta", attrs={"property": "article:published_time"}) or \
+                       soup.find("meta", attrs={"name": "datePublished"})
+            published_date = date_tag["content"].strip() if date_tag and "content" in date_tag.attrs else "Unknown"
+
+            # Extract and clean text
+            text = soup.get_text(strip=True)
+
+            # Detect Language using langid instead of langdetect
+            detected_lang, _ = langid.classify(text)  # langid returns (language, confidence)
+
+            if detected_lang not in ["en", "de"]:
+                print(f" Skipping {url} (Detected Language: {detected_lang})")
+                continue  # Skip this document
+
+            # Store valid document
+            metadata = {
+                "source": url,
+                "title": title or "Untitled",
+                "author": author or "Unknown",
+                "published_date": published_date or "Unknown",
+                "language": detected_lang  # Store detected language
+            }
+
+            cleaned_docs.append(Document(page_content=text, metadata=metadata))
+
+        return cleaned_docs
+
     except Exception as e:
         print(f"Error loading {url}: {e}")
         return []
 
+
+
 async def load_all_urls(urls):
     """
-    Asynchronously loads multiple URLs concurrently.
+    Asynchronously loads multiple URLs concurrently and cleans the content.
 
     :param urls: A list of URLs to fetch HTML content from.
-    :return: A list of parsed HTML documents or an empty list if an error occurs.
+    :return: A list of cleaned text documents or an empty list if an error occurs.
     """
     tasks = [load_url_async(url) for url in urls]
     results = await asyncio.gather(*tasks)
     return [doc for sublist in results for doc in sublist]
+
 
 def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference_name=None):
     """
@@ -73,7 +132,7 @@ def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference
             for file in pdf_files:
                 pdf_loader = PyPDFLoader(os.path.join(data_dir, file))
                 documents.extend(pdf_loader.load())
-
+        print(malpedia_reference_name)
         # Fetch and load Malpedia references if enabled
         if malpedia_reference_name is not None :
             urls = get_references_from_malpedia(malpedia_reference_name)
