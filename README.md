@@ -23,7 +23,7 @@ Memory Investigator was developed as part of a master's thesis at the Munich Uni
 
 - Windows 10 or higher
 - Stable Version with Python 3.11.9 (`python --version`)
-- [Download Python Releases for Windows](https://www.python.org/downloads/windows/)
+- [Download Python Releases for Windows](https://www.python.org/downloads/release/python-3119/)
 - Internet connection for Volatility3 downloads and LLM API interactions
 - Google Gemini or OpenAI API Key
 
