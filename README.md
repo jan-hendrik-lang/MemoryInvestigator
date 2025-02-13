@@ -71,7 +71,7 @@ O:\
 
 ### 3. Streamlit Configuration
 
-To extend the capabilities of Streamlit (e.g. displaying debug message, or increasing the upload file size), create a `.streamlit` folder in the `MemoryInvestigator` directory with a `config.toml` file containing the following sample configuration. During the initial setup, entering an email can be skipped.
+To extend the capabilities of Streamlit (e.g. displaying debug message, or increasing the upload file size), in the directory `.streamlit` a file called `config.toml` is created containing the following sample configuration. During the initial setup, entering an email can be skipped.
 
 ```sh
 [client]
@@ -82,10 +82,7 @@ level = "debug"
 messageFormat = "%(asctime)s %(message)s"
 
 [server]
-maxUploadSize = 20000
-
-[browser]
-gatherUsageStats = false
+maxUploadSize = 2000
 ```
 
 ## Usage
