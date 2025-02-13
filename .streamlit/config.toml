@@ -1,0 +1,9 @@
+[client]
+showErrorDetails = false
+
+[logger]
+level = "debug"
+messageFormat = "%(asctime)s %(message)s"
+
+[server]
+maxUploadSize = 2000
