@@ -1,0 +1,15 @@
+# Screenshots
+MemoryInvestigator/screenshots/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Memory dump files
+*.dmp
+*.vmem
+*.img
+*.raw
