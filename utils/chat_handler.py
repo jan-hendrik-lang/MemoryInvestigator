@@ -16,7 +16,7 @@ os_name = platform.system()
 if os_name == "Windows":
     temp_path = "O:\\03_trees\\temp"
 else:  # Linux/macOS
-    temp_path = "/tmp/MemoryInvestigator/03_trees/temp"  # Adjust as needed
+    temp_path = "/tmp/MemoryInvestigator/03_trees/temp"
 
 
 def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
