@@ -1,6 +1,7 @@
 import os
 import re
 import asyncio
+import platform
 import langid
 from bs4 import BeautifulSoup
 
@@ -13,6 +14,16 @@ from langchain.schema import Document
 
 from utils.get_malpedia_references import get_references_from_malpedia
 
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate directories based on OS
+if os_name == "Windows":
+    data_dir = "O:\\05_standard_rag"
+else:  # Linux/macOS
+    data_dir = "/tmp/MemoryInvestigator/05_standard_rag"
+
+vectorstore_dir = os.path.join(data_dir, "chroma_store")
 
 async def load_url_async(url):
     """
@@ -56,7 +67,7 @@ async def load_url_async(url):
             text = soup.get_text(strip=True)
 
             # Detect Language using langid instead of langdetect
-            detected_lang, _ = langid.classify(text)  # langid returns (language, confidence)
+            detected_lang, _ = langid.classify(text)
 
             if detected_lang not in ["en", "de"]:
                 print(f" Skipping {url} (Detected Language: {detected_lang})")
@@ -68,7 +79,7 @@ async def load_url_async(url):
                 "title": title or "Untitled",
                 "author": author or "Unknown",
                 "published_date": published_date or "Unknown",
-                "language": detected_lang  # Store detected language
+                "language": detected_lang
             }
 
             cleaned_docs.append(Document(page_content=text, metadata=metadata))
@@ -78,8 +89,6 @@ async def load_url_async(url):
     except Exception as e:
         print(f"Error loading {url}: {e}")
         return []
-
-
 
 async def load_all_urls(urls):
     """
@@ -92,7 +101,6 @@ async def load_all_urls(urls):
     results = await asyncio.gather(*tasks)
     return [doc for sublist in results for doc in sublist]
 
-
 def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference_name=None):
     """
     Builds a standard retrieval-augmented generation (RAG) model using uploaded PDFs.
@@ -104,37 +112,32 @@ def build_standard_rag(api_key, llm_option, embedding_option, malpedia_reference
     :return: A retriever object for querying the generated vector store.
     """
 
-    # Define data directories
-    data_dir = "O:\\05_standard_rag"
-    vectorstore_dir = "O:\\05_standard_rag\\chroma_store"
-
     # Initialize embedding model
     if llm_option.startswith("gemini"):
-        # Google GenAI Model
         os.environ["GOOGLE_API_KEY"] = api_key
         embeddings = GoogleGenerativeAIEmbeddings(model=embedding_option)
-    elif llm_option == "chatgpt-4o-latest" or llm_option == "gpt-3.5-turbo" or llm_option == "o1-preview":
-        # OpenAI Model
+    elif llm_option in ["chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]:
         os.environ["OPENAI_API_KEY"] = api_key
         embeddings = OpenAIEmbeddings(model=embedding_option)
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
     # Check if Chroma vector store already exists
     if os.path.exists(vectorstore_dir):
         vectorstore = Chroma(persist_directory=vectorstore_dir, embedding_function=embeddings)
     else:
-        os.makedirs(vectorstore_dir)
+        os.makedirs(vectorstore_dir, exist_ok=True)
 
         # Load and process PDF documents
         documents = []
         pdf_files = [file for file in os.listdir(data_dir) if file.endswith(".pdf")]
-        if pdf_files:  # Check if there are PDF files in the directory
+        if pdf_files:
             for file in pdf_files:
                 pdf_loader = PyPDFLoader(os.path.join(data_dir, file))
                 documents.extend(pdf_loader.load())
-        print(malpedia_reference_name)
+
         # Fetch and load Malpedia references if enabled
-        if malpedia_reference_name is not None :
+        if malpedia_reference_name:
             urls = get_references_from_malpedia(malpedia_reference_name)
             documents.extend(asyncio.run(load_all_urls(urls)))
 

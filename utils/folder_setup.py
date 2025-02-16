@@ -3,10 +3,14 @@ import tempfile
 import shutil
 import json
 
-# Global variable to store the temporary directory path
-TEMP_DIR = None
+def define_base_drive(os_name):
+    if os_name == "Windows":
+        base_drive = "O:"
+    else:  # Linux/macOS
+        base_drive = "/tmp/MemoryInvestigator"
+    return base_drive
 
-# List of subdirectories to be created within the temporary drive
+# List of subdirectories to be created within the virtual drive
 SUBDIRECTORIES = [
     "00_tools",
     "01_memory",
@@ -18,56 +22,71 @@ SUBDIRECTORIES = [
     "07_help",
 ]
 
-# Function to create a temporary drive and initialize subdirectories
-def create_drive():
+# Global variable to store the temporary directory path
+temp_dir = None
+
+def create_drive(os_name):
     """
-    Creates a temporary virtual drive and initializes necessary subdirectories.
+    Creates a virtual drive and initializes necessary subdirectories.
 
     :return: A success message indicating the creation of the drive and folders.
     """
-    global TEMP_DIR
+    global temp_dir
 
-    # Check if O: drive exists; if not, create a temporary directory and assign it to O:
-    if not os.path.exists("O:"):
-        TEMP_DIR = tempfile.mkdtemp()
-        os.system(f"subst O: {TEMP_DIR}")
+    base_drive = define_base_drive(os_name)
 
-    # Verify if the virtual drive was successfully created
-    if not os.path.exists("O:"):
-        return "Failed to create temporary directory."
+    if os_name == "Windows":
+        # Check if O: drive exists; if not, create a temporary directory and assign it to O:
+        if not os.path.exists(base_drive):
+            temp_dir = tempfile.mkdtemp()
+            os.system(f"subst {base_drive} {temp_dir}")
+
+        # Verify if the virtual drive was successfully created
+        if not os.path.exists(base_drive):
+            return "Failed to create temporary directory."
+    else:  # Linux/macOS
+        # Create the mount point if it doesn't exist
+        os.makedirs(base_drive, exist_ok=True)
+        temp_dir = base_drive
 
     # Create necessary subdirectories
     for folder in SUBDIRECTORIES:
-        folder_path = os.path.join("O:\\", folder)
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        folder_path = os.path.join(base_drive, folder)
+        os.makedirs(folder_path, exist_ok=True)
 
     # Create an empty settings file
-    settings_file_path = os.path.join("O:\\", "settings.json")
+    settings_file_path = os.path.join(base_drive, "settings.json")
     settings_data = {}
     with open(settings_file_path, "w") as file:
         json.dump(settings_data, file, indent=4)
 
-    return f"Drive O: and Folders are created."
+    return f"Drive {base_drive} and Folders are created."
 
-# Function to remove the virtual drive and all its contents
-def remove_drive():
+def remove_drive(os_name):
     """
-    Deletes the temporary virtual drive and its subdirectories.
+    Deletes the virtual drive and its subdirectories.
 
     :return: A message indicating whether the drive was successfully removed.
     """
-    global TEMP_DIR
+    global temp_dir
 
-    if os.path.exists("O:"):
-        os.system("subst O: /D")
-        if TEMP_DIR:
+    base_drive = define_base_drive(os_name)
+
+    if os_name == "Windows":
+        if os.path.exists(base_drive):
+            os.system(f"subst {base_drive} /D")
+            if temp_dir:
+                try:
+                    shutil.rmtree(temp_dir, ignore_errors=True)  # Delete the temporary directory
+                    temp_dir = None
+                    return "Drive disconnected and contents deleted."
+                except Exception as e:
+                    return f"Failure while disconnecting Drive: {str(e)}"
+            return "Drive disconnected."
+    else:  # Linux/macOS
+        if os.path.exists(base_drive):
             try:
-                shutil.rmtree(TEMP_DIR, ignore_errors=True)  # Delete the temporary directory
-                TEMP_DIR = None
-                return "Drive disconnected and Contents deleted."
+                shutil.rmtree(base_drive, ignore_errors=True)
+                return "Drive contents deleted."
             except Exception as e:
-                return f"Failure while disconnecting Drive: {str(e)}"
-        return "Drive disconnected."
-
-
+                return f"Failure while removing drive contents: {str(e)}"

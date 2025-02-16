@@ -1,5 +1,6 @@
 import os
 import json
+import platform
 import pandas as pd
 import streamlit as st
 
@@ -7,28 +8,37 @@ import streamlit as st
 from utils.volatility_analysis import run_file_search_analysis, run_file_extraction
 from utils.file_handler import find_memory_files
 
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate file path based on OS
+if os_name == "Windows":
+    data_extraction_dir = "O:\\04_data_extraction"
+else:  # Linux/macOS
+    data_extraction_dir = "/tmp/MemoryInvestigator/04_data_extraction"
+
+FILE_PATH = os.path.join(data_extraction_dir, "windows.filescan.json")
+
 # Streamlit page title and description
 st.title("Extract Data")
-st.caption("Display and search detected files from Volatility3's file scan. Extract specific files to `O:\\04_data_extraction` using the provided virtual offset.")
-
-# Define the file path where Volatility3's file scan results are stored
-file_path = "O:\\04_data_extraction\\windows.filescan.json"
+st.caption(f"Display and search detected files from Volatility3's file scan. Extract specific files to `{data_extraction_dir}` using the provided virtual offset.")
 
 # If the file scan JSON does not exist, run the file analysis first
-if not os.path.isfile(file_path):
+if not os.path.isfile(FILE_PATH):
     memory_file = find_memory_files()
     filescan_data = run_file_search_analysis(memory_file)
 
 # Load the file scan JSON output
 try:
-    with open(file_path, 'r', encoding='utf-16') as file:
+    with open(FILE_PATH, 'r', encoding='utf-16') as file:
         data = json.load(file)
-except UnicodeError:
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-except Exception as e:
-    st.error(f"Error reading {file_path}: {e}")
-
+except (UnicodeError, json.JSONDecodeError):
+    try:
+        with open(FILE_PATH, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+    except Exception as e:
+        st.error(f"Error reading {FILE_PATH}: {e}")
+        st.stop()
 
 # General search input for filtering results
 general_search_term = st.text_input("Enter search term to filter all data:")
@@ -39,7 +49,7 @@ try:
     elif isinstance(data, dict):  # If JSON is a dictionary
         df = pd.DataFrame([data])
     else:
-        st.warning(f"Unsupported JSON structure in file: {file_path}")
+        st.warning(f"Unsupported JSON structure in file: {FILE_PATH}")
 
     # Reorder DataFrame columns to prioritize specific fields
     lowercase_columns = {col.lower(): col for col in df.columns}  # Map lowercase to Original
@@ -56,17 +66,17 @@ try:
                 axis=1
             )
         ]
-        st.write(f"### Results for '{general_search_term}' in {file_path}:")
+        st.write(f"### Results for '{general_search_term}' in {FILE_PATH}:")
         st.dataframe(filtered_df)
     else:
-        st.write(f"### Data from {file_path}")
+        st.write(f"### Data from {FILE_PATH}")
         st.dataframe(df)
 
 except Exception as e:
-    st.error(f"Error processing {file_path}: {e}")
+    st.error(f"Error processing {FILE_PATH}: {e}")
 
 # Input field for specifying the offset for file extraction
-offset = st.number_input("Extract files to `O:\\04_data_extraction\\` using the offset from the given table.", step=1, value=0)
+offset = st.number_input(f"Extract files to `{data_extraction_dir}` using the offset from the given table.", step=1, value=0)
 
 # Button to trigger file extraction
 if st.button("Extract File", use_container_width=True):

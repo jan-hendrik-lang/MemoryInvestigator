@@ -1,7 +1,17 @@
 import os
+import platform
 import streamlit as st
 
-def divide_json(num_parts, json_file_path, save_path="O:\\03_trees\\temp"):
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate temp directory for JSON parts
+if os_name == "Windows":
+    default_save_path = "O:\\03_trees\\temp"
+else:  # Linux/macOS
+    default_save_path = "/tmp/MemoryInvestigator/03_trees/temp"  # Adjust as needed
+
+def divide_json(num_parts, json_file_path, save_path=default_save_path):
     """
     Splits a JSON file into smaller parts and saves them as separate files.
 
@@ -11,8 +21,7 @@ def divide_json(num_parts, json_file_path, save_path="O:\\03_trees\\temp"):
     :return: List of file paths for the divided JSON files.
     """
     # Ensure the output directory exists
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    os.makedirs(save_path, exist_ok=True)
 
     # Validate input parameters
     if num_parts <= 0:

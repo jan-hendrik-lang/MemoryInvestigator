@@ -1,14 +1,26 @@
 import os
 import json
+import platform
 import pandas as pd
 import streamlit as st
+
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate folder path based on OS
+if os_name == "Windows":
+    folder_path = "O:\\02_volatility_output"
+else:  # Linux/macOS
+    folder_path = "/tmp/MemoryInvestigator/02_volatility_output"
 
 # Streamlit page title and description
 st.title("Display Data")
 st.caption("Display data from the memory file by selecting a Volatility3 module and searching within a specific column or across all columns.")
 
-# Define the folder path containing JSON output files from Volatility3
-folder_path = r"O:\\02_volatility_output"
+# Ensure directory exists
+if not os.path.exists(folder_path):
+    st.error(f"Directory {folder_path} does not exist.")
+    st.stop()
 
 # Retrieve all JSON files in the directory
 json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
@@ -35,12 +47,13 @@ if selected_files:
         try:
             with open(file_path, 'r', encoding='utf-16') as file:
                 data = json.load(file)
-        except UnicodeError:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-        except Exception as e:
-            st.error(f"Error reading {file_name}: {e}")
-            continue
+        except (UnicodeError, json.JSONDecodeError):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+            except Exception as e:
+                st.error(f"Error reading {file_name}: {e}")
+                continue
 
         # Convert JSON data to Pandas DataFrame
         try:

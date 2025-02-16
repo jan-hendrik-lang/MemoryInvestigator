@@ -1,21 +1,32 @@
 import json
 import os
+import platform
+
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate directory for output trees
+if os_name == "Windows":
+    tree_output_path = "O:\\03_trees"
+else:  # Linux/macOS
+    tree_output_path = "/tmp/MemoryInvestigator/03_trees"
 
 def load_json_utf16(filepath):
     """
-    Loads a JSON file encoded in UTF-16.
+    Loads a JSON file encoded in UTF-16. Falls back to UTF-8 if UTF-16 fails.
 
     :param filepath: Path to the JSON file.
     :return: Parsed JSON data or an empty list if an error occurs.
     """
     try:
         with open(filepath, "r", encoding="utf-16") as file:
-            data = json.load(file)
-            return data
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError as e:
-        return []
+            return json.load(file)
+    except (UnicodeError, json.JSONDecodeError):
+        try:
+            with open(filepath, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
 
 def build_hierarchical_tree(selected_files, mode, pid=None):
     """
@@ -97,7 +108,7 @@ def build_hierarchical_tree(selected_files, mode, pid=None):
         if file_node["children"]:
             root["children"].append(file_node)
 
-    # Step 3: Save the output to O:\03_trees
+    # Step 3: Save the output to the correct directory
     mode_to_path = {
         "costume": "costume_system_analysis_tree.json",
         "basic": "basic_system_analysis_tree.json"
@@ -106,8 +117,9 @@ def build_hierarchical_tree(selected_files, mode, pid=None):
     if not safe_path:
         raise ValueError("Invalid mode. Use 'costume' or 'basic'.")
 
-    output_path = os.path.join("O:\\03_trees", safe_path)
+    output_path = os.path.join(tree_output_path, safe_path)
     try:
+        os.makedirs(tree_output_path, exist_ok=True)  # Ensure directory exists
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(root, f, indent=4)
     except Exception as e:

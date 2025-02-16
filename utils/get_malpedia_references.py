@@ -8,11 +8,11 @@ def get_references_from_malpedia(reference_name):
     :return: A list of URLs from the response or an error message
     """
     # Define the API endpoint
-    API_URL = f"https://malpedia.caad.fkie.fraunhofer.de/api/get/family/{reference_name}"
+    api_url = f"https://malpedia.caad.fkie.fraunhofer.de/api/get/family/{reference_name}"
     headers = {"Accept": "application/json"}
 
     # Make the request
-    response = requests.get(API_URL, headers=headers)
+    response = requests.get(api_url, headers=headers)
 
     # Check response
     if response.status_code == 200:
