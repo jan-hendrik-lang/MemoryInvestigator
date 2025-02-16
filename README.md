@@ -21,14 +21,14 @@ Memory Investigator was developed as part of a master's thesis at the Munich Uni
 
 ### Prerequisites
 
-- Windows 10 or higher
+- Windows 10 or higher / Linux Ubuntu 24.04.01 LTS
 - Stable Version with Python 3.11.9 (`python --version`)
 - [Download Python Python 3.11.9](https://www.python.org/downloads/release/python-3119/)
 - The `python.exe` must be available in the PATH variable
 - Internet connection for Volatility3 downloads and LLM API interactions
 - Google Gemini or OpenAI API Key
 
-### Setup
+### Windows Setup
 
 1. Clone the repository:
    ```sh
@@ -41,24 +41,63 @@ Memory Investigator was developed as part of a master's thesis at the Munich Uni
    ```
 3. Start the Streamlit application:
    ```sh
-   streamlit run .\main.py
+   streamlit run main.py
+   ```
+
+### Linux Setup including Python 3.11 Virtual Environment
+
+1. Install Python 3.11 and virtual environment packages:
+   ```sh
+   sudo apt-get install python3.11-dev python3.11-venv
+   ```
+2. Find out where Python 3.11 is located, should be `/usr/bin/python3.11`, if not, change below:
+   ```sh
+   which python3.11
+   ```
+3. Create Virtual Environment in the Home directory:
+   ```sh
+   cd
+   mkdir virtual_env
+   /usr/bin/python3.11 -m venv ~/virtual_env/venv_with_python3.11
+   source ~/virtual_env/venv_with_python3.11/bin/activate
+   ```
+4. Test Python Version:
+   ```sh
+   python --version
+   ```
+5. Clone the repository:
+   ```sh
+   git clone https://github.com/jan-hendrik-lang/MemoryInvestigator.git
+   cd MemoryInvestigator
+   ```
+6. Install required dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
+7. Start the Streamlit application:
+   ```sh
+   streamlit run main.py
+   ```
+8. Deactivate Virtual Environment:
+   ```sh
+   deactivate
    ```
 
 ## Background Processes and Individual Configuration
 
 ### 1. Background Startup Process
 
-- **Virtual Drive Initialization:** A temporary drive O: is created to store forensic tools and data.
+- **Virtual Drive Windows Initialization:** A temporary drive O: is created to store forensic tools and data.
+- **Virtual Drive Linux Initialization:** A temporary directory `/tmp/MemoryInvestigator` is created to store forensic tools and data.
 - **Volatility3 Download:** Volatility3 is downloaded.
 - **Dependencies Uninstallation:** For a clean Volatility3 installation, an old Yara is uninstalled beforehand.
 - **Dependencies Installation:** Necessary Python packages and Volatility plugins are installed.
 
 ### 2. Folder Structure
 
-The following folder structure in `O:` is created automatically.
+The following folder structure in Windows in `O:` or in Linux in `/tmp/MemoryInvestigator` is created automatically.
 
 ```
-O:\
 ├── 00_tools\              # Volatility3 and dependencies
 ├── 01_memory\             # Uploaded memory dumps
 ├── 02_volatility_output\  # Forensic output files

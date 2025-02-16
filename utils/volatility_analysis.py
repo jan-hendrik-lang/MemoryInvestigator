@@ -1,8 +1,19 @@
 import subprocess
+import platform
+import os
 
-# Define output directories for analysis and data extraction
-ANALYZED_VOLATILITY_OUTPUT = "O:\\02_volatility_output"
-DATA_EXTRACTION_OUTPUT = "O:\\04_data_extraction\\"
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate directories based on OS
+if os_name == "Windows":
+    analyzed_volatility_output = "O:\\02_volatility_output"
+    data_extraction_output = "O:\\04_data_extraction\\"
+    volatility_path = "O:\\00_tools\\volatility3-2.8.0\\vol.py"
+else:  # Linux/macOS
+    analyzed_volatility_output = "/tmp/MemoryInvestigator/02_volatility_output"
+    data_extraction_output = "//tmp/MemoryInvestigator/04_data_extraction"
+    volatility_path = "/tmp/MemoryInvestigator/00_tools/volatility3-2.8.0/vol.py"
 
 def run_analysis(memory_file, plugins):
     """
@@ -15,7 +26,12 @@ def run_analysis(memory_file, plugins):
     results = []
     for plugin in plugins:
         try:
-            command =  f"powershell -command \"python.exe O:\\00_tools\\volatility3-2.8.0\\vol.py -r json -f {memory_file} {plugin} > {ANALYZED_VOLATILITY_OUTPUT}\\{plugin}.json\""
+            output_file = os.path.join(analyzed_volatility_output, f"{plugin}.json")
+            if os_name == "Windows":
+                command = f"powershell -command \"python.exe {volatility_path} -r json -f {memory_file} {plugin} > {output_file}\""
+            else:  # Linux/macOS
+                command = f"python3 {volatility_path} -r json -f {memory_file} {plugin} > {output_file}"
+
             subprocess.run(command, shell=True, check=True)
             results.append(f"{plugin} successfully executed.")
         except Exception as e:
@@ -31,7 +47,13 @@ def run_file_search_analysis(memory_file):
     """
     results = []
     plugin = "windows.filescan"
-    command =  f"powershell -command \"python.exe O:\\00_tools\\volatility3-2.8.0\\vol.py -r json -f {memory_file} {plugin} > {DATA_EXTRACTION_OUTPUT}\\{plugin}.json\""
+    output_file = os.path.join(data_extraction_output, f"{plugin}.json")
+
+    if os_name == "Windows":
+        command = f"powershell -command \"python.exe {volatility_path} -r json -f {memory_file} {plugin} > {output_file}\""
+    else:  # Linux/macOS
+        command = f"python3 {volatility_path} -r json -f {memory_file} {plugin} > {output_file}"
+
     subprocess.run(command, shell=True, check=True)
     results.append(f"{plugin} successfully executed.")
     return results
@@ -46,7 +68,12 @@ def run_file_extraction(memory_file, offset):
     """
     results = []
     plugin = "windows.dumpfiles"
-    command =  f"powershell -command \"python.exe O:\\00_tools\\volatility3-2.8.0\\vol.py -f {memory_file} -o {DATA_EXTRACTION_OUTPUT} {plugin} --virtaddr {offset} \""
+
+    if os_name == "Windows":
+        command = f"powershell -command \"python.exe {volatility_path} -f {memory_file} -o {data_extraction_output} {plugin} --virtaddr {offset}\""
+    else:  # Linux/macOS
+        command = f"python3 {volatility_path} -f {memory_file} -o {data_extraction_output} {plugin} --virtaddr {offset}"
+
     subprocess.run(command, shell=True, check=True)
     results.append(f"{plugin} successfully executed.")
     return results

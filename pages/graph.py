@@ -1,6 +1,17 @@
 import json
+import os
+import platform
 import streamlit as st
 from streamlit_agraph import agraph, Config, Node, Edge
+
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate file path based on OS
+if os_name == "Windows":
+    file_path = "O:\\02_volatility_output\\windows.pslist.json"
+else:  # Linux/macOS
+    file_path = "/tmp/MemoryInvestigator/02_volatility_output/windows.pslist.json"
 
 # Streamlit page title and description
 st.title("Graph Generator")
@@ -35,19 +46,17 @@ def build_process_tree(data, highlight_pid=None):
 
     return nodes, edges
 
-# Path to the JSON file containing process information
-file_path = "O:\\02_volatility_output\\windows.pslist.json"
-
 # Load JSON data
 try:
     with open(file_path, 'r', encoding='utf-16') as file:
         data = json.load(file)
-except UnicodeError:
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-except Exception as e:
-    st.error(f"Error reading {file_path}: {e}")
-    st.stop()
+except (UnicodeError, json.JSONDecodeError):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+    except Exception as e:
+        st.error(f"Error reading {file_path}: {e}")
+        st.stop()
 
 # Initialize session state for PID highlighting
 if "highlight_pid" not in st.session_state:
@@ -81,5 +90,3 @@ config = Config(
 
 # Display the interactive graph
 agraph(nodes=nodes, edges=edges, config=config)
-
-

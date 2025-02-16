@@ -1,4 +1,14 @@
 import os
+import platform
+
+# Detect operating system
+os_name = platform.system()
+
+# Define the appropriate directory for tree files
+if os_name == "Windows":
+    tree_directory = "O:\\03_trees"
+else:  # Linux/macOS
+    tree_directory = "/tmp/MemoryInvestigator/03_trees"
 
 def choose_basic_or_costume_tree():
     """
@@ -6,14 +16,12 @@ def choose_basic_or_costume_tree():
 
     :return: The path to the selected JSON tree file, or None if no tree exists.
     """
-    # Define the directory where tree files are stored
-    directory = r"O:\03_trees"
     file1 = "basic_system_analysis_tree.json"
     file2 = "costume_system_analysis_tree.json"
 
     # Construct full file paths
-    file1_tree = os.path.join(directory, file1)
-    file2_tree = os.path.join(directory, file2)
+    file1_tree = os.path.join(tree_directory, file1)
+    file2_tree = os.path.join(tree_directory, file2)
 
     # Check if the files exist
     file1_exists = os.path.isfile(file1_tree)

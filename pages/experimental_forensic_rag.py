@@ -1,5 +1,5 @@
 import os
-
+import platform
 import streamlit as st
 
 # Import utility functions for file handling, tree selection, experimental RAG building, and querying
@@ -8,26 +8,40 @@ from utils.select_tree import choose_basic_or_costume_tree
 from utils.build_rag_from_books_and_volatility3_data import build_experimental_forensic_rag
 from utils.initialize_rag_chat import answer_query
 
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate directories based on OS
+if os_name == "Windows":
+    volatility_output_dir = "O:\\02_volatility_output"
+    experimental_rag_dir = "O:\\06_experimental_rag"
+else:  # Linux/macOS
+    volatility_output_dir = "/tmp/MemoryInvestigator/02_volatility_output"
+    experimental_rag_dir = "/tmp/MemoryInvestigator/06_experimental_rag"
+
+vectorstore_dir = os.path.join(experimental_rag_dir, "chroma_store")
+
 # Streamlit page title and description
 st.title("Experimental Forensic RAG")
-st.caption("This module enhances the capabilities of the standard RAG by integrating uploaded PDFs with Volatility3 data output files. The Volatility3 output files are automatically processed from `O:\\02_volatility_output` and stored in the vector database. While this approach is experimental, the goal is to achieve deeper insights by linking memory forensics data with document-based information, enabling a more comprehensive forensic analysis.")
+st.caption(f"This module enhances the capabilities of the standard RAG by integrating uploaded PDFs with Volatility3 data output files. The Volatility3 output files are automatically processed from `{volatility_output_dir}` and stored in the vector database. While this approach is experimental, the goal is to achieve deeper insights by linking memory forensics data with document-based information, enabling a more comprehensive forensic analysis.")
 
 # File Upload Mechanism
 uploaded_files = st.file_uploader(
-    "File upload may take some time. Alternatively, you can manually transfer the files to `O:\\06_experimental_rag`.",
+    f"File upload may take some time. Alternatively, you can manually transfer the files to `{experimental_rag_dir}`.",
     type=["pdf"],
     accept_multiple_files=True
 )
 
 if uploaded_files:
     """
-    Uploads multiple files from the Streamlit file uploader to 'O:\\06_experimental_rag'.
+    Uploads multiple files from the Streamlit file uploader to `EXPERIMENTAL_RAG_DIR`.
     """
+    os.makedirs(experimental_rag_dir, exist_ok=True)
     for uploaded_file in uploaded_files:
-        rag_file_path = handle_memory_upload(uploaded_file, "O:\\06_experimental_rag")
+        rag_file_path = handle_memory_upload(uploaded_file, experimental_rag_dir)
         st.success(f"File saved to: {rag_file_path}")
 
-st.caption("Choose your preferred LLM and embedding for the analysis. Once the RAG is built, embeddings cannot be changed, but you can switch between LLMs from one company (e.g. `gemini-1.5-pro` to `gemini-2.0-flash-exp`) for further insights. Important: Due to its connection with the Chroma Database, the Streamlit task must be closed before deleting or renewing the RAG and the directory `O:\\06_experimental_rag\\chroma_store` must be deleted manually.")
+st.caption(f"Choose your preferred LLM and embedding for the analysis. Once the RAG is built, embeddings cannot be changed, but you can switch between LLMs from one company (e.g. `gemini-1.5-pro` to `gemini-2.0-flash-exp`) for further insights. Important: Due to its connection with the Chroma Database, the Streamlit task must be closed before deleting or renewing the RAG and the directory `{vectorstore_dir}` must be deleted manually.")
 
 # Choose a Large Language Model (LLM)
 left, middle, right = st.columns(3)
@@ -39,7 +53,7 @@ llm_option = left.selectbox(
 )
 if llm_option.startswith("gemini"):
     embedding_options = ["models/embedding-001", "models/embedding-004"]
-elif llm_option == "chatgpt-4o-latest" or llm_option == "gpt-3.5-turbo" or llm_option == "o1-preview":
+elif llm_option in ["chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]:
     embedding_options = ["text-embedding-3-large"]
 embedding_option = middle.selectbox(
     "Select an Embedding of your choice:",
@@ -48,8 +62,6 @@ embedding_option = middle.selectbox(
 )
 # API key input field for LLM
 api_key = right.text_input("API Key Input:", type="password")
-
-vectorstore_dir = "O:\\06_experimental_rag\\chroma_store"
 
 # Build RAG and Chat with LLM, if RAG is available
 if api_key:
@@ -71,9 +83,9 @@ if api_key:
             if st.button("Build RAG", use_container_width=True):
                 with st.spinner("⏳ Processing... This may take a while. Depending on the complexity, it could take **several hours**. Feel free to grab a coffee ☕ or check back later."):
                     build_experimental_forensic_rag(api_key, llm_option, embedding_option)
-                    st.success("Experimental RAG successfully built and saved to `O:\\06_experimental_rag\\chroma_store`.")
+                    st.success(f"Experimental RAG successfully built and saved to `{vectorstore_dir}`.")
                     st.rerun()
     except Exception as e:
         st.error(f"Error during query processing: {str(e)}")
 else:
-    st.error("You must provide API Key to continue working.")
+    st.error("You must provide an API Key to continue working.")

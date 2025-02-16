@@ -1,6 +1,16 @@
+import os
+import platform
 import streamlit as st
-
 import google.generativeai as genai
+
+# Detect operating system
+os_name = platform.system()
+
+# Define appropriate file path based on OS
+if os_name == "Windows":
+    report_file_path = "O:/analysis_report.txt"
+else:  # Linux/macOS
+    report_file_path = "/tmp/MemoryInvestigator/analysis_report.txt"
 
 # Streamlit page title and description
 st.title("Report Generator")
@@ -8,7 +18,7 @@ st.caption("Generate a report summarizing your findings.")
 
 # Select an LLM model
 left, right = st.columns(2)
-llm_options = ["gemini-1.5-flash", "gemini-2.0-flash-exp", "gpt-4o"]
+llm_options = ["gemini-1.5-flash", "gemini-2.0-flash-exp"]
 llm_option = left.selectbox(
     "Select an LLM of your choice:",
     options=llm_options,
@@ -20,7 +30,7 @@ api_key = right.text_input("API LLM Key Input:", type="password")
 
 if api_key:
     # Google LLM Options
-    if llm_option == "gemini-1.5-flash" or llm_option == "gemini-2.0-flash-exp":
+    if llm_option in ["gemini-1.5-flash", "gemini-2.0-flash-exp"]:
         genai.configure(api_key=api_key)
         prompt = st.chat_input("Ask Gemini about helping to summarize your key findings:")
 
@@ -32,16 +42,15 @@ if api_key:
         if prompt:
             with st.spinner("Fetching response..."):
                 answer = convo.send_message(prompt)
-                word_content = convo.last.text
+                txt_content = convo.last.text
 
-            # Save output as Word file
-            word_filename = "O:/gemini_analysis.docx"
-
+            # Save output as a Word file
             try:
-                with open(word_filename, "w", encoding="utf-8") as word_file:
-                    word_file.write(word_filename)
-                st.success(f"Word file saved to {word_filename}")
+                os.makedirs(os.path.dirname(report_file_path), exist_ok=True)
+                with open(report_file_path, "w", encoding="utf-8") as txt_file:
+                    txt_file.write(txt_content)
+                st.success(f"Word file saved to {report_file_path}")
             except Exception as e:
-                st.error(f"Failed to save Word file: {e}")
+                st.error(f"Failed to save Text file: {e}")
 
-            st.write("**Gemini says:**", word_content)
+            st.write("**Gemini says:**", txt_content)
