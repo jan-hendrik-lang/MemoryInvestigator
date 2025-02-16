@@ -9,7 +9,7 @@ os_name = platform.system()
 if os_name == "Windows":
     default_save_path = "O:\\03_trees\\temp"
 else:  # Linux/macOS
-    default_save_path = "/tmp/MemoryInvestigator/03_trees/temp"  # Adjust as needed
+    default_save_path = "/tmp/MemoryInvestigator/03_trees/temp"
 
 def divide_json(num_parts, json_file_path, save_path=default_save_path):
     """
