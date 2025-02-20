@@ -30,7 +30,7 @@ st.caption(f"Upload memory files and enter project details on this page. If a me
 # File uploader allowing multiple memory file types
 uploaded_files = st.file_uploader(
     f"File upload may take some time. Alternatively, you can manually transfer the files to `{memory_dir}`.",
-    type=["raw", "vmem", "vmsn"],
+    type=["raw", "vmem", "vmsn", "mem"],
     accept_multiple_files=True  # Allow multiple files
 )
 
@@ -86,7 +86,7 @@ if left.button("Save Project Settings", use_container_width=True):
 
 try:
     # Check if any memory files exist in the target directory
-    if os.path.exists(memory_dir) and any(file.lower().endswith(('.raw', '.vmem', '.vmsn')) for file in os.listdir(memory_dir)):
+    if os.path.exists(memory_dir) and any(file.lower().endswith(('.raw', '.vmem', '.vmsn', '.mem')) for file in os.listdir(memory_dir)):
         st.success("Valid memory files found in the directory.")
 
         # Check if a hierarchical tree has already been generated

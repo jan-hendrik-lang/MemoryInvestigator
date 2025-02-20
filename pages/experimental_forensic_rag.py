@@ -7,6 +7,7 @@ from utils.file_handler import handle_memory_upload
 from utils.select_tree import choose_basic_or_costume_tree
 from utils.build_rag_from_books_and_volatility3_data import build_experimental_forensic_rag
 from utils.initialize_rag_chat import answer_query
+from config import llm_options
 
 # Detect operating system
 os_name = platform.system()
@@ -45,7 +46,6 @@ st.caption(f"Choose your preferred LLM and embedding for the analysis. Once the 
 
 # Choose a Large Language Model (LLM)
 left, middle, right = st.columns(3)
-llm_options = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp", "gemini-2.0-flash-thinking-exp", "chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]
 llm_option = left.selectbox(
     "Select an LLM of your choice:",
     options=llm_options,
@@ -53,7 +53,7 @@ llm_option = left.selectbox(
 )
 if llm_option.startswith("gemini"):
     embedding_options = ["models/embedding-001", "models/embedding-004"]
-elif llm_option in ["chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]:
+elif llm_option in ["gpt-4o", "gpt-3.5-turbo", "o1"]:
     embedding_options = ["text-embedding-3-large"]
 embedding_option = middle.selectbox(
     "Select an Embedding of your choice:",

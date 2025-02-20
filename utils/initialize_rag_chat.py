@@ -20,7 +20,7 @@ def chat_rag(retriever, llm_option):
     # Initialize the LLM model
     if llm_option.startswith("gemini"):
         llm = GoogleGenerativeAI(model=llm_option)
-    elif llm_option == "chatgpt-4o-latest" or llm_option == "gpt-3.5-turbo" or llm_option == "o1-preview":
+    elif llm_option in ["gpt-4o", "gpt-3.5-turbo", "o1"]:
         llm = ChatOpenAI(model=llm_option)
 
     # Define the system prompt for forensic memory analysis

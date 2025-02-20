@@ -6,7 +6,7 @@ Memory Investigator was developed as part of a master's thesis at the Munich Uni
 
 ## Features
 
-- **Automated Memory Analysis**: Uses Volatility3 to process memory dumps (`.raw`, `.vmem`, `.vmsn`) efficiently.
+- **Automated Memory Analysis**: Uses Volatility3 to process memory dumps (`.raw`, `.vmem`, `.vmsn`, `.mem`) efficiently.
 - **Tabular Data Representation**: Displays and allows searching of memory forensic findings.
 - **Graphical Data Representation**: Displays process hierarchies as a graph and allows searching for specific PIDs.
 - **Tree-of-Table Algorithm**: Algorithm to organize structured data into a hierarchical Tree-of-Table format, optimizing it for AI analysis and improved interpretability.
@@ -128,7 +128,7 @@ maxUploadSize = 2000
 
 ### 1. Data Input
 
-Upload memory dump files (`.raw`, `.vmem`, `.vmsn`) and provide project details. The upload could take a while, alternatively files can be transferred manually to `O:\01_memory`. This is especially recommended for large files. Do not upload more than one memory dump (expecting a `.vmem` could require a corresponding `.vmsn` File). If a requirement is not fulfilled (e.g. missing memory dump) not all pages or buttons will be available.
+Upload memory dump files (`.raw`, `.vmem`, `.vmsn` `.mem`) and provide project details. The upload could take a while, alternatively files can be transferred manually to `O:\01_memory`. This is especially recommended for large files. Do not upload more than one memory dump (expecting a `.vmem` could require a corresponding `.vmsn` File). If a requirement is not fulfilled (e.g. missing memory dump) not all pages or buttons will be available.
 
 ![Data Input](screenshots/data_input.jpg)
 

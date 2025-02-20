@@ -11,7 +11,7 @@ else:  # Linux/macOS
     memory_dump_dir = "/tmp/MemoryInvestigator/01_memory"
 
 # Allowed file extensions for memory dumps
-memory_extensions = (".vmem", ".raw")
+memory_extensions = (".vmem", ".raw", ".mem")
 
 def handle_memory_upload(uploaded_file, upload_dir=memory_dump_dir):
     """

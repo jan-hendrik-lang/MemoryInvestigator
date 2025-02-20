@@ -51,7 +51,7 @@ def build_experimental_forensic_rag(api_key, llm_option, embedding_option):
     if llm_option.startswith("gemini"):
         os.environ["GOOGLE_API_KEY"] = api_key
         embeddings = GoogleGenerativeAIEmbeddings(model=embedding_option)
-    elif llm_option in ["chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]:
+    elif llm_option in ["gpt-4o", "gpt-3.5-turbo", "o1"]:
         os.environ["OPENAI_API_KEY"] = api_key
         embeddings = OpenAIEmbeddings(model=embedding_option)
 

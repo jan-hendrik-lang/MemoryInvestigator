@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import platform
 import streamlit as st
@@ -41,9 +42,10 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                     file_name = os.path.join(temp_path, f"temp_{i + 1:02d}.json")
                     with open(file_name, 'r', encoding='utf-8') as file:
                         chunk = file.read()
+                        chunk = re.sub(r'"children": \[\]', ' ', chunk)  # Replace empty children with a space
+                        cleaned_chunk = re.sub(r'\s+', ' ', chunk).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
-                        model = genai.GenerativeModel(model_name=llm_option,
-                                                      system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {chunk}")
+                        model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_chunk}")
                         convo = model.start_chat(history=[])
 
                         if prompt:
@@ -55,8 +57,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                 if all_responses:
                     summary_prompt = "Summarize the findings from all parts of the JSON data. " + " ".join(
                         all_responses)
-                    model = genai.GenerativeModel(model_name=llm_option,
-                                                  system_instruction="You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder.")
+                    model = genai.GenerativeModel(model_name=llm_option, system_instruction="You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder.")
                     convo = model.start_chat(history=[])
                     with st.spinner("Fetching summary..."):
                         summary_response = convo.send_message(summary_prompt)
@@ -65,8 +66,10 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
             else:
                 with open(tree, 'r', encoding='utf-8') as file:
                     json_data = file.read()
-                    model = genai.GenerativeModel(model_name=llm_option,
-                                                  system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {json_data}")
+                    json_data = re.sub(r'"children": \[\]', ' ', json_data)  # Replace empty children with a space
+                    cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
+
+                    model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_json_data}")
 
                     convo = model.start_chat(history=[])
 
@@ -78,7 +81,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
             st.error("Please build a tree first.")
 
     # OpenAI LLM Options
-    elif llm_option in ["chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]:
+    elif llm_option in ["gpt-4o", "gpt-3.5-turbo", "o1"]:
         tree = choose_basic_or_costume_tree()
         client = OpenAI(api_key=api_key)
         if tree is not None:
@@ -89,6 +92,8 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                     file_name = os.path.join(temp_path, f"temp_{i + 1:02d}.json")
                     with open(file_name, 'r', encoding='utf-8') as file:
                         chunk = file.read()
+                        chunk = re.sub(r'"children": \[\]', ' ', chunk)  # Replace empty children with a space
+                        cleaned_chunk = re.sub(r'\s+', ' ', chunk).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                         if prompt:
                             with st.spinner(f"Fetching response for part {i + 1}..."):
@@ -96,7 +101,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                                     model=llm_option,
                                     messages=[
                                         {"role": "system",
-                                         "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {chunk}"},
+                                         "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_chunk}"},
                                         {"role": "user", "content": prompt}
                                     ]
                                 )
@@ -120,6 +125,8 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
             else:
                 with open(tree, 'r', encoding='utf-8') as file:
                     json_data = file.read()
+                    json_data = re.sub(r'"children": \[\]', ' ', json_data)  # Replace empty children with a space
+                    cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                     if prompt:
                         with st.spinner("Fetching response..."):
@@ -127,7 +134,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                                 model=llm_option,
                                 messages=[
                                     {"role": "system",
-                                     "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {json_data}"},
+                                     "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_json_data}"},
                                     {"role": "user", "content": prompt}
                                 ]
                             )

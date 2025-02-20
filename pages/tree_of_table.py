@@ -6,6 +6,7 @@ import streamlit as st
 # Import utility functions for Chat handling, and tree building
 from utils.chat_handler import handle_llm_chat
 from utils.tree_builder import build_hierarchical_tree, load_selected_files
+from config import llm_options
 
 # Detect operating system
 os_name = platform.system()
@@ -62,7 +63,6 @@ if os.path.isfile(tree_file_path):
 
 # Choose a Large Language Model (LLM)
 left, middle, right = st.columns(3)
-llm_options = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp", "gemini-2.0-flash-thinking-exp", "chatgpt-4o-latest", "gpt-3.5-turbo", "o1-preview"]
 llm_option = left.selectbox(
     "Select an LLM of your choice:",
     options=llm_options,

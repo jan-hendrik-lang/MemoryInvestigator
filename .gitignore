@@ -10,3 +10,4 @@ ENV/
 *.vmem
 *.img
 *.raw
+*.mem
