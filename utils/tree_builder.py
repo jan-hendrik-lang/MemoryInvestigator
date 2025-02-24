@@ -137,7 +137,7 @@ field_mapping = {
     "windows.getsids.json": ["SID"],
     "windows.hollowprocesses.json": ["Process", "Notes"],
     "windows.ldrmodules.json": ["InInit", "InLoad", "InMem", "MappedPath"],
-    "windows.malfind.json": ["Process", "Protection", "Disarm"],
+    "windows.malfind.json": ["Process", "Protection", "Disasm", "Hexdump", "Notes"],
     "windows.processghosting.json": ["Process", "FILE_OBJECT", "DeletePending", "Path"],
     "windows.svcdiff.json": ["Binary", "Binary (Registry)", "Order", "Start", "State", "Dll"],
     "windows.svcscan.json": ["Binary", "Binary (Registry)", "Order", "Start", "State", "Dll"],
