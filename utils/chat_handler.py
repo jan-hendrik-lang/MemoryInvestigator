@@ -42,9 +42,12 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                     with open(file_name, 'r', encoding='utf-8') as file:
                         chunk = file.read()
                         chunk = re.sub(r'"children": \[\]', ' ', chunk)  # Replace empty children with a space
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', chunk)  # Remove error message
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', chunk)  # Remove error message
+
                         cleaned_chunk = re.sub(r'\s+', ' ', chunk).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
-                        model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_chunk}")
+                        model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise. Data: {cleaned_chunk}")
                         convo = model.start_chat(history=[])
 
                         if prompt:
@@ -56,7 +59,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                 if all_responses:
                     summary_prompt = "Summarize the findings from all parts of the JSON data. " + " ".join(
                         all_responses)
-                    model = genai.GenerativeModel(model_name=llm_option, system_instruction="You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder.")
+                    model = genai.GenerativeModel(model_name=llm_option, system_instruction="You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise.")
                     convo = model.start_chat(history=[])
                     with st.spinner("Fetching summary..."):
                         summary_response = convo.send_message(summary_prompt)
@@ -66,9 +69,11 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                 with open(tree, 'r', encoding='utf-8') as file:
                     json_data = file.read()
                     json_data = re.sub(r'"children": \[\]', ' ', json_data)  # Replace empty children with a space
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', json_data)  # Remove error message
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', json_data)  # Remove error message
                     cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
-                    model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_json_data}")
+                    model = genai.GenerativeModel(model_name=llm_option, system_instruction=f"You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise. Data: {cleaned_json_data}")
 
                     convo = model.start_chat(history=[])
 
@@ -92,6 +97,9 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                     with open(file_name, 'r', encoding='utf-8') as file:
                         chunk = file.read()
                         chunk = re.sub(r'"children": \[\]', ' ', chunk)  # Replace empty children with a space
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', chunk)  # Remove error message
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', chunk)  # Remove error message
+
                         cleaned_chunk = re.sub(r'\s+', ' ', chunk).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                         if prompt:
@@ -100,7 +108,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                                     model=llm_option,
                                     messages=[
                                         {"role": "system",
-                                         "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_chunk}"},
+                                         "content": f"You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise. Data: {cleaned_chunk}"},
                                         {"role": "user", "content": prompt}
                                     ]
                                 )
@@ -115,7 +123,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                             model=llm_option,
                             messages=[
                                 {"role": "system",
-                                 "content": "You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder."},
+                                 "content": "You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise."},
                                 {"role": "user", "content": summary_prompt}
                             ]
                         )
@@ -125,6 +133,9 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                 with open(tree, 'r', encoding='utf-8') as file:
                     json_data = file.read()
                     json_data = re.sub(r'"children": \[\]', ' ', json_data)  # Replace empty children with a space
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', json_data)  # Remove error message
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', json_data)  # Remove error message
+
                     cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                     if prompt:
@@ -133,7 +144,7 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                                 model=llm_option,
                                 messages=[
                                     {"role": "system",
-                                     "content": f"You are a forensic RAM Analyst Assistant. Traverse the JSON Tree and help to find an intruder: {cleaned_json_data}"},
+                                     "content": f"You are a forensic RAM Analyst Assistant specializing in Windows memory analysis. Analyze the JSON tree of Windows memory artifacts to detect intrusions or malicious activities. Cross-check your findings with known threats and provide clear, specific reasons for flagging any anomalies (e.g., unusual parent-child relationships, code injection, execution from non-standard locations). If you're unsure, ask clarifying questions; if you don't know, say so. Generate a structured forensic report highlighting confirmed threats while minimizing noise. Data: {cleaned_json_data}"},
                                     {"role": "user", "content": prompt}
                                 ]
                             )
@@ -155,6 +166,9 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                     with open(file_name, 'r', encoding='utf-8') as file:
                         chunk = file.read()
                         chunk = re.sub(r'"children": \[\]', ' ', chunk)  # Replace empty children with a space
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', chunk)  # Remove error message
+                        chunk = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', chunk)  # Remove error message
+
                         cleaned_chunk = re.sub(r'\s+', ' ', chunk).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                         if prompt:
@@ -184,6 +198,9 @@ def handle_llm_chat(llm_option, api_key, number_of_divided_jsons, prompt):
                 with open(tree, 'r', encoding='utf-8') as file:
                     json_data = file.read()
                     json_data = re.sub(r'"children": \[\]', ' ', json_data)  # Replace empty children with a space
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', json_data)  # Remove error message
+                    json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', json_data)  # Remove error message
+
                     cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()  # Replace all whitespace (newlines, tabs, spaces) with a single space
 
                     if prompt:

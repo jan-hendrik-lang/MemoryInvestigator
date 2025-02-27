@@ -92,7 +92,8 @@ GLOBAL_VOLATILITY = [
     "windows.svcdiff",
     "windows.cmdline",
     "windows.dlllist",
-    "windows.getsids"
+    "windows.getsids",
+    "windows.psscan"
 ]
 
 def modify_global_var():

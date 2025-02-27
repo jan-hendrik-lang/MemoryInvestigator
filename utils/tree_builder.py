@@ -42,10 +42,13 @@ def build_hierarchical_tree(selected_files, mode, pid=None):
     root = {"name": "System Analysis", "children": []}
     process_nodes = {}  # To hold processes by PID
 
-    # Step 1: Build the base process tree using pslist.json
-    if "windows.pslist.json" in selected_files:
+    # Determine which process list to use: prefer psscan else pslist
+    process_list_file = "windows.psscan.json" if "windows.psscan.json" in selected_files else "windows.pslist.json"
+
+    # Step 1: Build the base process tree using process_list_file
+    if process_list_file in selected_files:
         processes_tree = {"name": "Processes", "children": []}
-        for process in selected_files["windows.pslist.json"]:
+        for process in selected_files[process_list_file]:
             current_pid = process.get("PID")
             if pid and current_pid != pid:  # Skip if PID does not match
                 continue
@@ -131,6 +134,7 @@ def build_hierarchical_tree(selected_files, mode, pid=None):
 field_mapping = {
     "windows.cmdline.json": ["Args"],
     "windows.pslist.json": ["PID", "PPID", "ImageFileName", "CreateTime", "ExitTime"],
+    "windows.psscan.json": ["PID", "PPID", "ImageFileName", "CreateTime", "ExitTime"],
     "windows.netscan.json": ["Created", "Owner", "Proto", "LocalAddr", "LocalPort", "ForeignAddr", "ForeignPort", "State"],
     "windows.netstat.json": ["Created", "Owner", "Proto", "LocalAddr", "LocalPort", "ForeignAddr", "ForeignPort", "State"],
     "windows.dlllist.json": ["LoadTime", "Path"],

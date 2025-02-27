@@ -74,8 +74,13 @@ async def gemini_first_thinking(api_llm_key, prompt=None):
     with open(tree, 'r', encoding='utf-8') as file:
         json_data = file.read()
         json_data = re.sub(r'"children": \[\]', ' ', json_data)
-        cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()
+        json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is not valid \(process exited\?\)', '', json_data)  # Remove error message
+        json_data = re.sub(r'Required memory at 0x[0-9a-fA-F]+ is inaccessible \(swapped\)', '', json_data)  # Remove error message
 
+        cleaned_json_data = re.sub(r'\s+', ' ', json_data).strip()
+        print("--START--")
+        print(cleaned_json_data)
+        print("--ENDE--")
     # Prepare system context (memory structure)
     system_msg = (
         "Analyze the provided JSON memory structure and assist in identifying "
