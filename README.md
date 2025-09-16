@@ -1,5 +1,20 @@
 # Memory Investigator
 
+## Publications and Academic Context
+
+Memory Investigator was created as part of the master’s thesis *Optimizing Memory Forensics: A Proof of Concept for Automating Queries and Integrating Large Language Models* at the Munich University of Applied Sciences.
+
+- **Master Thesis**:  
+  The complete thesis document is available in the repository under `/docs/thesis/`.
+
+- **Research Paper**:  
+  The scientific background and evaluation of this project were published in the ACM Digital Library:  
+  [Optimizing Memory Forensics: A Proof of Concept for Automating Queries and Integrating Large Language Models](https://dl.acm.org/doi/pdf/10.1145/3748263)
+
+- **Research Paper Presentation**:  
+  A detailed presentation of the tool and research results is also available in the repository under `/docs/presentation/` (slides and recording).
+
+
 ## Overview
 
 Memory Investigator was developed as part of a master's thesis at the Munich University of Applied Sciences. It is a Streamlit-based application designed to automate memory forensic analysis. The tool specializes in Windows memory analysis and integrates Volatility3 and Large Language Models (LLMs), including Retrieval-Augmented Generation (RAG) and an enhanced Tree-of-Table Algorithm. So the tool allows to dig deeper into the memory dump and therefore enhances efficiency and usability in memory forensics.
@@ -354,4 +369,5 @@ By acknowledging these ethical and technical challenges, users can better manage
 ## Contact
 
 For inquiries or support, contact: [j.lang@hm.edu](mailto:j.lang@hm.edu)
+
 
