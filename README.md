@@ -12,7 +12,7 @@ Memory Investigator was created as part of the master’s thesis *Optimizing Mem
   [Optimizing Memory Forensics: A Proof of Concept for Automating Queries and Integrating Large Language Models](https://dl.acm.org/doi/pdf/10.1145/3748263)
 
 - **Research Paper Presentation**:  
-  A detailed presentation of the tool and research results is also available in the repository under `/docs/presentation/` (slides and recording).
+  A detailed presentation of the tool and research results is also available in the repository under `/docs/presentation/`.
 
 
 ## Overview
@@ -369,5 +369,6 @@ By acknowledging these ethical and technical challenges, users can better manage
 ## Contact
 
 For inquiries or support, contact: [j.lang@hm.edu](mailto:j.lang@hm.edu)
+
 
 
