@@ -5,14 +5,14 @@
 Memory Investigator was created as part of the master’s thesis *Optimizing Memory Forensics: A Proof of Concept for Automating Queries and Integrating Large Language Models* at the Munich University of Applied Sciences.
 
 - **Master Thesis**:  
-  The complete thesis document is available in the repository under `/docs/thesis/`.
+  The complete thesis document is available in the repository under `/docs`.
 
 - **Research Paper**:  
   The scientific background and evaluation of this project were published in the ACM Digital Library:  
   [Optimizing Memory Forensics: A Proof of Concept for Automating Queries and Integrating Large Language Models](https://dl.acm.org/doi/pdf/10.1145/3748263)
 
 - **Research Paper Presentation**:  
-  A detailed presentation of the tool and research results is also available in the repository under `/docs/presentation/`.
+  A detailed presentation of the tool and research results is also available in the repository under `/docs`.
 
 
 ## Overview
@@ -369,6 +369,7 @@ By acknowledging these ethical and technical challenges, users can better manage
 ## Contact
 
 For inquiries or support, contact: [j.lang@hm.edu](mailto:j.lang@hm.edu)
+
 
 
 
