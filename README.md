@@ -1,4 +1,4 @@
-# Memory Investigator - Master Thesis Project
+# Memory Investigator
 
 ## Overview
 
@@ -354,3 +354,4 @@ By acknowledging these ethical and technical challenges, users can better manage
 ## Contact
 
 For inquiries or support, contact: [j.lang@hm.edu](mailto:j.lang@hm.edu)
+
